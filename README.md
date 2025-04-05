@@ -8,9 +8,9 @@
 ## 📚 Repository Contents
 
 ### 📂 Presentation
-- `ARchitect-Presentation.pptx` - Final defense slides  
-- `ARchitect-Presentation.pdf` - Printer-friendly version  
-
+- `ARchitect-Presentation.pptx` --> https://github.com/avanishkasar/WEB_3.0/blob/Presentation-Media/ARchitect-Presentation.pptx     . Final defense slides  
+- `ARchitect-Presentation.pdf` -->  https://github.com/avanishkasar/WEB_3.0/blob/Presentation-Media/ARchitect-Presentation.pdf  .        - Printer-friendly version  
+ 
 ### 🖼️ Screenshots at https://github.com/avanishkasar/WEB_3.0/tree/Presentation-Media
 
 
@@ -32,7 +32,7 @@
    
    git clone -b documentation [https://github.com/your-username/ARchitect.git](https://github.com/avanishkasar/WEB_3.0/tree/main)
 
-Slides: ARchitect-Presentation.pptx
+Slides: ARchitect-Presentation.pptx --> https://github.com/avanishkasar/WEB_3.0/blob/Presentation-Media/ARchitect-Presentation.pptx
 
 Demo: Watch videos/Full-Video.mp4
 
