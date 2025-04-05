@@ -34,7 +34,7 @@
 
 Slides: ARchitect-Presentation.pptx
 
-Demo: Watch videos/Full-Demo.mp4
+Demo: Watch videos/Full-Video.mp4
 
 
 For Developers:
