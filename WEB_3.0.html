@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARchitect | Modern Design Solutions</title>
+    
+    <!-- Add A-Frame and AR.js libraries for the red box AR experience -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary: #121212;
+            --secondary: #1d1d1d;
+            --accent: #7000ff;
+            --text: #ffffff;
+            --text-secondary: #b3b3b3;
+            --highlight: #8a2be2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes floatY {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--accent); }
+            50% { box-shadow: 0 0 20px var(--accent), 0 0 30px var(--highlight); }
+            100% { box-shadow: 0 0 5px var(--accent); }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .button-gradient {
+            background: linear-gradient(90deg, #7000ff, #bd00ff);
+            background-size: 200% 200%;
+            animation: gradientFlow 3s ease infinite;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu-button {
+            display: none;
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #7000ff, #bd00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            position: relative;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: linear-gradient(90deg, #7000ff, #bd00ff);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            animation: fadeIn 1s ease-out forwards;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            background: linear-gradient(90deg, #fff, #7000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .cta-button {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(90deg, #7000ff, #bd00ff);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: glow 3s infinite;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(112, 0, 255, 0.4);
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(112, 0, 255, 0.2) 0%, rgba(18, 18, 18, 1) 70%);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.2;
+            animation: floatY 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--accent), transparent);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: 20%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, var(--highlight), transparent);
+            border-radius: 64% 36% 27% 73% / 55% 58% 42% 45%;
+            top: 60%;
+            right: 15%;
+            animation-delay: 1s;
+        }
+
+        .shape:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #bd00ff, transparent);
+            border-radius: 41% 59% 37% 63% / 44% 67% 33% 56%;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 8rem 5%;
+            background-color: var(--secondary);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+            animation-delay: 0.3s;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+            animation-delay: 0.6s;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background-color: rgba(29, 29, 29, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+            position: relative;
+        }
+
+        .service-card:nth-child(1) { animation-delay: 0.3s; }
+        .service-card:nth-child(2) { animation-delay: 0.6s; }
+        .service-card:nth-child(3) { animation-delay: 0.9s; }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(112, 0, 255, 0.2);
+            border-color: rgba(112, 0, 255, 0.3);
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .service-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 3rem;
+        }
+
+        .service-button {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(112, 0, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: var(--accent);
+        }
+
+        .service-card:hover .service-button {
+            background-color: var(--accent);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Room Customizer Section */
+        .room-customizer {
+            padding: 6rem 5%;
+            background-color: var(--primary);
+        }
+
+        .room-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .room-section {
+            margin-bottom: 3rem;
+        }
+
+        .room-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .room-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .room-frame {
+            width: 100%;
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(112, 0, 255, 0.3);
+            position: relative;
+        }
+
+        .room-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent);
+            z-index: 10;
+        }
+
+        .room-title-bar {
+            display: flex;
+            align-items: center;
+        }
+
+        .room-title-icon {
+            width: 32px;
+            height: 32px;
+            background-color: rgba(112, 0, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+        }
+
+        .room-title-text {
+            color: white;
+            font-weight: 600;
+        }
+
+        .room-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .room-control-button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .room-control-button:hover {
+            color: white;
+        }
+
+        .room-bottom-controls {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .room-bottom-button {
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .room-bottom-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .room-bottom-info {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 5px 12px;
+            color: white;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+
+        .room-fullscreen {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+
+        .ar-container {
+            position: relative;
+            height: 350px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(112, 0, 255, 0.3);
+            background-color: black;
+        }
+
+        .ar-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: linear-gradient(to bottom, #1a1a1a, #0e0e0e);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .ar-marker {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            border: 4px solid rgba(112, 0, 255, 0.3);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .ar-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .ar-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .ar-button.primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .ar-button.secondary {
+            background-color: #333;
+            color: white;
+        }
+
+        .ar-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .ar-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .ar-control-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ar-info {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 0.75rem;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .ar-info-title {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .ar-info-text {
+            color: #ccc;
+            font-size: 0.75rem;
+        }
+
+        .furniture-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .furniture-button {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            background-color: #333;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .furniture-button.active {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .furniture-button.red-active {
+            background-color: #e53e3e;
+            color: white;
+        }
+
+        /* Budget Planner Section */
+        .budget-planner {
+            margin-top: 4rem;
+            background-color: var(--primary);
+        }
+
+        .budget-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .budget-title {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .budget-subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .budget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .budget-item {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .budget-item:hover {
+            border-color: rgba(112, 0, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .budget-item-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .budget-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: rgba(112, 0, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .budget-item-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .budget-input-group {
+            margin-bottom: 1rem;
+        }
+
+        .budget-label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .budget-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            transition: border-color 0.3s ease;
+        }
+
+        .budget-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .budget-amount {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .budget-currency {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .budget-total {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .budget-total-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .budget-total-amount {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Gemini AI Assistant */
+        .gemini-assistant {
+            margin-top: 2.5rem;
+            background-color: var(--primary-dark);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gemini-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gemini-icon {
+            background-color: var(--accent);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .gemini-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .gemini-content {
+            padding: 1.5rem;
+        }
+
+        .gemini-messages {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .gemini-message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .gemini-message.gemini {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .gemini-message.user {
+            background-color: rgba(255, 255, 255, 0.1);
+            margin-left: 2rem;
+        }
+
+        .gemini-message-content {
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .gemini-message-content ul {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .gemini-message-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .gemini-input-container {
+            display: flex;
+            position: relative;
+        }
+
+        .gemini-input {
+            flex: 1;
+            padding: 1rem;
+            padding-right: 3rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .gemini-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .gemini-send-button {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: transparent;
+            border: none;
+            color: var(--accent);
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gemini-send-button:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Portfolio Section */
+        .portfolio {
+            padding: 6rem 5%;
+            background-color: var(--secondary);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .portfolio-item {
+            background-color: var(--primary);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .portfolio-item:nth-child(1) { animation-delay: 0.3s; }
+        .portfolio-item:nth-child(2) { animation-delay: 0.6s; }
+        .portfolio-item:nth-child(3) { animation-delay: 0.9s; }
+
+        .portfolio-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(112, 0, 255, 0.2);
+        }
+
+        .portfolio-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .portfolio-item-content {
+            padding: 1.5rem;
+        }
+
+        .portfolio-item-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .portfolio-item-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .portfolio-item-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .portfolio-button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            background-color: rgba(112, 0, 255, 0.1);
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .portfolio-button:hover {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 5%;
+            background-color: var(--primary);
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-card {
+            background-color: rgba(29, 29, 29, 0.5);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(112, 0, 255, 0.1);
+            border-color: rgba(112, 0, 255, 0.2);
+        }
+
+        .contact-card-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(112, 0, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .contact-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .contact-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .contact-form {
+            background-color: rgba(29, 29, 29, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            transition: border-color 0.3s ease;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #7000ff, #bd00ff);
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(112, 0, 255, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 5% 2rem;
+            background-color: var(--secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #7000ff, #bd00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background-color: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 2rem;
+        }
+
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--secondary);
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            background-color: rgba(112, 0, 255, 0.1);
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-button.primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .modal-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Success Modal */
+        .success-modal .modal-header {
+            background-color: var(--accent);
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem auto 2rem;
+            color: var(--accent);
+            font-size: 2rem;
+        }
+
+        .success-message {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-text {
+            color: var(--text-secondary);
+        }
+
+        /* Hiro Marker Modal */
+        .hiro-modal .modal-body {
+            text-align: center;
+        }
+
+        .hiro-marker-image {
+            width: 100%;
+            max-width: 300px;
+            border: 3px solid rgba(112, 0, 255, 0.3);
+            border-radius: 10px;
+            margin: 1rem 0 2rem;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -300px;
+                width: 300px;
+                height: 100vh;
+                flex-direction: column;
+                background-color: var(--secondary);
+                padding: 6rem 2rem 2rem;
+                transition: right 0.3s ease;
+                gap: 1.5rem;
+                z-index: 999;
+            }
+
+            .nav-links.active {
+                right: 0;
+                box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+            }
+
+            .menu-close {
+                position: absolute;
+                top: 1.5rem;
+                right: 1.5rem;
+                background: none;
+                border: none;
+                color: var(--text);
+                font-size: 1.25rem;
+                cursor: pointer;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .services-grid, .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+
+            .room-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* AR Red Box Experience */
+        #arRedBoxContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .ar-back-button {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 2001;
+            background-color: rgba(112, 0, 255, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+        }
+        
+        .ar-instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            z-index: 2001;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">ARchitect</div>
+        <div class="nav-links" id="navLinks">
+            <button class="menu-close" id="menuClose">✕</button>
+            <a href="#home">Home</a>
+            <a href="#services">Services</a>
+            <a href="#room-customizer">Room Designer</a>
+            <a href="#budget-planner">Budget Planner</a>
+            <a href="#portfolio">Portfolio</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <button class="mobile-menu-button" id="mobileMenuButton">☰</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="hero-content">
+            <h1>Transform Spaces Into Experiences</h1>
+            <p>Bringing architectural visualization to life with cutting-edge AR technology and interactive design tools.</p>
+            <a href="#services" class="cta-button">Explore Our Services</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <h2 class="section-title">Our Services</h2>
+        <p class="section-subtitle">Experience cutting-edge visualization technology and planning tools to transform your design ideas into beautiful interactive spaces.</p>
+
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
+                        <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"></path>
+                        <path d="M21 9V3"></path>
+                        <path d="M3 9V3"></path>
+                        <path d="M12 14v3"></path>
+                        <path d="M8 14v1"></path>
+                        <path d="M16 14v1"></path>
+                    </svg>
+                </div>
+                <h3 class="service-title">3D Room Designer</h3>
+                <p class="service-description">Our interactive 3D room planner helps you visualize your space before making any changes. Experiment with layouts, furniture, and color schemes in real-time.</p>
+                <a href="#room-customizer" class="service-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+                    </svg>
+                </div>
+                <h3 class="service-title">AI Budget Planner</h3>
+                <p class="service-description">Our AI-powered budget planning tool helps you estimate costs for your architectural projects, considering materials, labor, and other expenses to optimize your investments.</p>
+                <a href="#budget-planner" class="service-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2.5 12.5 7 21l4.5-10 4.5 10 4.5-8.5"></path>
+                        <path d="M21.5 21v-8h-8"></path>
+                    </svg>
+                </div>
+                <h3 class="service-title">AR Furniture Preview</h3>
+                <p class="service-description">Augmented reality solutions that let you see furniture and design elements in your real space through your camera, helping you make confident design decisions.</p>
+                <a href="#room-customizer" class="service-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Room Customizer Section -->
+    <section class="room-customizer" id="room-customizer">
+        <h2 class="section-title">Interactive Room Planning</h2>
+        <p class="section-subtitle">Design your ideal space with our powerful 3D tools and augmented reality visualizations</p>
+
+        <div class="room-content">
+            <!-- 3D Room Planner -->
+            <div class="room-section">
+                <h3 class="room-title">3D Room Planner</h3>
+                <p class="room-description">Use our powerful 3D room planner to design and customize your space with professional tools</p>
+                
+                <div class="room-frame" style="height: 550px;">
+                    <div class="room-header">
+                        <div class="room-title-bar">
+                            <div class="room-title-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                                    <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
+                                    <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"></path>
+                                </svg>
+                            </div>
+                            <span class="room-title-text">3D Interior Design</span>
+                        </div>
+                        <div class="room-controls">
+                            <a href="https://sketchfab.com/models/c1869c8e3af648d6badc801819dae926" target="_blank" class="room-control-button" title="Open on Sketchfab">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                            <button class="room-control-button" id="roomFullscreenBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <polyline points="9 21 3 21 3 15"></polyline>
+                                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <iframe 
+                        src="https://sketchfab.com/models/c1869c8e3af648d6badc801819dae926/embed" 
+                        width="100%" 
+                        height="100%" 
+                        frameborder="0" 
+                        allow="autoplay; fullscreen; vr" 
+                        mozallowfullscreen="true" 
+                        webkitallowfullscreen="true"
+                        allowfullscreen
+                        style="z-index: 1;"
+                    ></iframe>
+                    
+                    <div class="room-bottom-controls">
+                        <a href="https://sketchfab.com" target="_blank" class="room-bottom-button" title="Powered by Sketchfab">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 18a4 4 0 0 0-8 0"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                                <circle cx="12" cy="12" r="10"></circle>
+                            </svg>
+                        </a>
+                        <div id="modelInfo" class="room-bottom-info">
+                            <span>Modern Interior by ARchitect</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AR Furniture Preview -->
+            <div class="room-section">
+                <h3 class="room-title">AR Furniture Preview</h3>
+                <p class="room-description">Use your camera to see furniture in your real space using augmented reality</p>
+                
+                <div class="ar-container" id="arContainer">
+                    <div class="ar-placeholder" id="arPlaceholder">
+                        <img 
+                            src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" 
+                            alt="HIRO AR Marker" 
+                            class="ar-marker"
+                            id="hiroMarker"
+                        />
+                        <h4>AR Furniture Visualization</h4>
+                        <p>Print or display the HIRO marker and point your camera at it to see furniture in AR</p>
+                        <div class="ar-buttons">
+                            <button id="downloadMarkerBtn" class="ar-button secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Download Marker
+                            </button>
+                            <button id="startARBtn" class="ar-button primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                    <circle cx="12" cy="13" r="4"></circle>
+                                </svg>
+                                Start AR Experience
+                            </button>
+                        </div>
+                        <p id="cameraError" class="ar-error" style="color: #e53e3e; margin-top: 1rem; display: none;"></p>
+                    </div>
+                    
+                    <div id="arView" style="display: none; width: 100%; height: 100%;">
+                        <!-- AR.js scene will be inserted here -->
+                    </div>
+                    
+                    <div class="ar-controls" id="arControls" style="display: none;">
+                        <button id="showMarkerBtn" class="ar-control-button" style="background-color: #7000ff; color: white;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <button id="closeARBtn" class="ar-control-button" style="background-color: #e53e3e; color: white;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="ar-info" id="arInfo" style="display: none;">
+                        <p class="ar-info-title" id="arInfoTitle">Choose an object below to view in AR</p>
+                        <p class="ar-info-text">Point your camera at the HIRO marker to see the object appear</p>
+                    </div>
+                </div>
+                
+                <div class="furniture-buttons" id="furnitureButtons" style="display: none;">
+                    <button id="chairBtn" class="furniture-button">Office Chair</button>
+                    <button id="tableBtn" class="furniture-button">Wooden Table</button>
+                    <button id="redboxBtn" class="furniture-button">Red Box</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Budget Planner Section -->
+    <section class="budget-planner" id="budget-planner">
+        <h2 class="section-title">AI Budget Planner & Assistant</h2>
+        <p class="section-subtitle">Estimate your project costs and get intelligent advice with our AI-powered tools</p>
+
+        <div class="budget-container">
+            <div class="budget-grid">
+                <!-- Construction Budget Item -->
+                <div class="budget-item">
+                    <div class="budget-item-header">
+                        <div class="budget-item-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                <path d="M12 12h.01"></path>
+                                <path d="M17 12h.01"></path>
+                                <path d="M7 12h.01"></path>
+                            </svg>
+                        </div>
+                        <h4 class="budget-item-title">Construction</h4>
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Square Feet</label>
+                        <input type="number" id="constructionSize" class="budget-input" value="1000">
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Cost per sq ft (₹)</label>
+                        <input type="number" id="constructionCost" class="budget-input" value="12000">
+                    </div>
+                    <div class="budget-amount">
+                        <span class="budget-currency">₹</span>
+                        <span id="constructionTotal">12,000,000</span>
+                    </div>
+                </div>
+
+                <!-- Interior Budget Item -->
+                <div class="budget-item">
+                    <div class="budget-item-header">
+                        <div class="budget-item-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3"></path>
+                                <path d="M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"></path>
+                                <path d="M4 12v8"></path>
+                                <path d="M20 12v8"></path>
+                                <path d="M2 8h20"></path>
+                                <path d="M2 16h20"></path>
+                            </svg>
+                        </div>
+                        <h4 class="budget-item-title">Interior Design</h4>
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Number of Rooms</label>
+                        <input type="number" id="interiorRooms" class="budget-input" value="5">
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Cost per room (₹)</label>
+                        <input type="number" id="interiorCost" class="budget-input" value="650000">
+                    </div>
+                    <div class="budget-amount">
+                        <span class="budget-currency">₹</span>
+                        <span id="interiorTotal">3,250,000</span>
+                    </div>
+                </div>
+
+                <!-- Furniture Budget Item -->
+                <div class="budget-item">
+                    <div class="budget-item-header">
+                        <div class="budget-item-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 10V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"></path>
+                                <path d="M4 19v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5"></path>
+                                <path d="M4 15h16"></path>
+                            </svg>
+                        </div>
+                        <h4 class="budget-item-title">Furniture</h4>
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Furniture Pieces</label>
+                        <input type="number" id="furniturePieces" class="budget-input" value="20">
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Avg cost per piece (₹)</label>
+                        <input type="number" id="furnitureCost" class="budget-input" value="85000">
+                    </div>
+                    <div class="budget-amount">
+                        <span class="budget-currency">₹</span>
+                        <span id="furnitureTotal">1,700,000</span>
+                    </div>
+                </div>
+
+                <!-- Technology Budget Item -->
+                <div class="budget-item">
+                    <div class="budget-item-header">
+                        <div class="budget-item-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+                        <h4 class="budget-item-title">Smart Home Tech</h4>
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Number of Devices</label>
+                        <input type="number" id="techDevices" class="budget-input" value="15">
+                    </div>
+                    <div class="budget-input-group">
+                        <label class="budget-label">Avg cost per device (₹)</label>
+                        <input type="number" id="techCost" class="budget-input" value="25000">
+                    </div>
+                    <div class="budget-amount">
+                        <span class="budget-currency">₹</span>
+                        <span id="techTotal">375,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="budget-total">
+                <div class="budget-total-label">Estimated Total</div>
+                <div class="budget-total-amount">₹<span id="grandTotal">17,325,000</span></div>
+            </div>
+            
+            <!-- Gemini AI Assistant -->
+            <div class="gemini-assistant">
+                <div class="gemini-header">
+                    <div class="gemini-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="gemini-title">Gemini AI Design Assistant</h3>
+                </div>
+                <div class="gemini-content">
+                    <div class="gemini-messages" id="geminiMessages">
+                        <div class="gemini-message gemini">
+                            <div class="gemini-message-content">
+                                Hello! I'm your Gemini AI design assistant. Ask me any questions about:
+                                <ul>
+                                    <li>Budget optimization suggestions</li>
+                                    <li>Furniture and material recommendations</li>
+                                    <li>Design and layout advice</li>
+                                    <li>Cost-saving tips for your project</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gemini-input-container">
+                        <input type="text" id="geminiInput" class="gemini-input" placeholder="Ask me about your project...">
+                        <button id="geminiSend" class="gemini-send-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m22 2-7 20-4-9-9-4Z"></path>
+                                <path d="M22 2 11 13"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio" id="portfolio">
+        <h2 class="section-title">Our Team</h2>
+        <p class="section-subtitle">Meet our talented team of architecture and design professionals</p>
+
+        <div class="portfolio-grid">
+            <!-- Team Member 1 -->
+            <div class="portfolio-item">
+                <!-- REPLACE THIS WITH AVANISH'S PHOTO: Use an image with 1:1 aspect ratio (square) -->
+                <div class="portfolio-image" style="background-color: #304f75; display: flex; justify-content: center; align-items: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: rgba(255,255,255,0.8);">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="portfolio-item-content">
+                    <h3 class="portfolio-item-title">Avanish Patel</h3>
+                    <p class="portfolio-item-description">Lead Architect & 3D Visualization Specialist with over 10 years of experience in commercial and residential projects.</p>
+                    <div class="portfolio-item-buttons">
+                        <button class="portfolio-button" id="viewAvanishCV">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            View CV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 2 -->
+            <div class="portfolio-item">
+                <!-- REPLACE THIS WITH ZAIB'S PHOTO: Use an image with 1:1 aspect ratio (square) -->
+                <div class="portfolio-image" style="background-color: #753048; display: flex; justify-content: center; align-items: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: rgba(255,255,255,0.8);">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="portfolio-item-content">
+                    <h3 class="portfolio-item-title">Zaib Khan</h3>
+                    <p class="portfolio-item-description">Interior Designer & AR Specialist with a focus on creating immersive spaces that blend technology with elegant design principles.</p>
+                    <div class="portfolio-item-buttons">
+                        <button class="portfolio-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            View CV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 3 -->
+            <div class="portfolio-item">
+                <!-- REPLACE THIS WITH JAMIL'S PHOTO: Use an image with 1:1 aspect ratio (square) -->
+                <div class="portfolio-image" style="background-color: #307556; display: flex; justify-content: center; align-items: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: rgba(255,255,255,0.8);">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="portfolio-item-content">
+                    <h3 class="portfolio-item-title">Jamil Ahmed</h3>
+                    <p class="portfolio-item-description">Project Manager & Budget Specialist who excels at optimizing resources while maintaining high quality standards in architectural projects.</p>
+                    <div class="portfolio-item-buttons">
+                        <button class="portfolio-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            View CV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <h2 class="section-title">Contact Us</h2>
+        <p class="section-subtitle">Reach out to discuss your project or schedule a consultation</p>
+
+        <div class="contact-container">
+            <div class="contact-info">
+                <!-- Address -->
+                <div class="contact-card">
+                    <div class="contact-card-header">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <h4 class="contact-label">Our Location</h4>
+                    </div>
+                    <p class="contact-text">
+                        Survey No. 12, 13. Opp. Hypercity Mall, Kasarvadavali, Ghodbunder Road, Thane West, Thane, Maharashtra 400615
+                    </p>
+                </div>
+
+                <!-- Phone -->
+                <div class="contact-card">
+                    <div class="contact-card-header">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="contact-label">Phone</h4>
+                    </div>
+                    <p class="contact-text">
+                        +9193926466780<br>
+                        Monday - Friday: 9am - 6pm
+                    </p>
+                </div>
+
+                <!-- Email -->
+                <div class="contact-card">
+                    <div class="contact-card-header">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                        </div>
+                        <h4 class="contact-label">Email</h4>
+                    </div>
+                    <p class="contact-text">
+                        info@architect-ar.com<br>
+                        support@architect-ar.com
+                    </p>
+                </div>
+            </div>
+
+            <div class="contact-form">
+                <h3 class="form-title">Send us a message</h3>
+                <p class="form-subtitle">We'll get back to you within 24 hours</p>
+
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Your Name</label>
+                        <input type="text" id="name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea id="message" class="form-textarea" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-button" id="submitForm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m22 2-7 20-4-9-9-4Z"></path>
+                            <path d="M22 2 11 13"></path>
+                        </svg>
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">ARchitect</div>
+            <div class="footer-links">
+                <a href="#home" class="footer-link">Home</a>
+                <a href="#services" class="footer-link">Services</a>
+                <a href="#room-customizer" class="footer-link">Room Designer</a>
+                <a href="#portfolio" class="footer-link">Portfolio</a>
+                <a href="#contact" class="footer-link">Contact</a>
+            </div>
+            <div class="footer-social">
+                <a href="#" class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                    </svg>
+                </a>
+                <a href="https://www.instagram.com/zaibwastakenn/" class="social-icon" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </a>
+                <a href="#" class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                    </svg>
+                </a>
+                <a href="#" class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                        <rect x="2" y="9" width="4" height="12"></rect>
+                        <circle cx="4" cy="4" r="2"></circle>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="copyright">&copy; 2025 ARchitect. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Contact Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Message Sent</h3>
+                <button class="modal-close" id="closeSuccessModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="success-message">
+                    <h4 class="success-title">Thank you for contacting us!</h4>
+                    <p class="success-text">We've received your message and will get back to you within 24 hours.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button primary" id="confirmSuccessModal">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hiro Marker Modal -->
+    <div class="modal hiro-modal" id="hiroModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">HIRO AR Marker</h3>
+                <button class="modal-close" id="closeHiroModal">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Print this marker or display it on another screen. Point your camera at it to see AR furniture.</p>
+                <img 
+                    src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" 
+                    alt="HIRO AR Marker" 
+                    class="hiro-marker-image"
+                >
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button primary" id="downloadMarkerModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download
+                </button>
+                <button class="modal-button" id="closeHiroModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const menuClose = document.getElementById('menuClose');
+            const navLinks = document.getElementById('navLinks');
+            const navLinkItems = navLinks.querySelectorAll('a');
+            const roomFullscreenBtn = document.getElementById('roomFullscreenBtn');
+
+            // Toggle mobile menu
+            mobileMenuButton.addEventListener('click', function() {
+                navLinks.classList.add('active');
+            });
+
+            menuClose.addEventListener('click', function() {
+                navLinks.classList.remove('active');
+            });
+
+            // Close mobile menu when clicking a link
+            navLinkItems.forEach(link => {
+                link.addEventListener('click', function() {
+                    navLinks.classList.remove('active');
+                });
+            });
+
+            // Smooth scroll for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Budget Planner Functionality
+            setupBudgetPlanner();
+            
+            // Gemini AI Chatbot
+            setupGeminiChat();
+
+            // Contact Form Submission
+            setupContactForm();
+
+            // Portfolio CV View
+            setupPortfolioButtons();
+
+            // AR Experience
+            setupARExperience();
+
+            // Intersection Observer for animations
+            setupAnimations();
+            
+            // Room fullscreen toggle
+            if (roomFullscreenBtn) {
+                roomFullscreenBtn.addEventListener('click', function() {
+                    const roomFrame = document.querySelector('.room-frame');
+                    const iframe = roomFrame.querySelector('iframe');
+                    
+                    if (iframe) {
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        } else {
+                            iframe.requestFullscreen().catch(err => {
+                                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        // Budget Planner Setup
+        function setupBudgetPlanner() {
+            // Get input elements
+            const constructionSize = document.getElementById('constructionSize');
+            const constructionCost = document.getElementById('constructionCost');
+            const interiorRooms = document.getElementById('interiorRooms');
+            const interiorCost = document.getElementById('interiorCost');
+            const furniturePieces = document.getElementById('furniturePieces');
+            const furnitureCost = document.getElementById('furnitureCost');
+            const techDevices = document.getElementById('techDevices');
+            const techCost = document.getElementById('techCost');
+
+            // Get output elements
+            const constructionTotal = document.getElementById('constructionTotal');
+            const interiorTotal = document.getElementById('interiorTotal');
+            const furnitureTotal = document.getElementById('furnitureTotal');
+            const techTotal = document.getElementById('techTotal');
+            const grandTotal = document.getElementById('grandTotal');
+
+            // Format number with commas
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            // Calculate totals
+            function calculateTotals() {
+                // Calculate individual totals
+                const constructionValue = constructionSize.value * constructionCost.value;
+                const interiorValue = interiorRooms.value * interiorCost.value;
+                const furnitureValue = furniturePieces.value * furnitureCost.value;
+                const techValue = techDevices.value * techCost.value;
+
+                // Update UI
+                constructionTotal.textContent = formatNumber(constructionValue);
+                interiorTotal.textContent = formatNumber(interiorValue);
+                furnitureTotal.textContent = formatNumber(furnitureValue);
+                techTotal.textContent = formatNumber(techValue);
+
+                // Calculate and update grand total
+                const total = constructionValue + interiorValue + furnitureValue + techValue;
+                grandTotal.textContent = formatNumber(total);
+            }
+
+            // Add event listeners to all inputs
+            [constructionSize, constructionCost, interiorRooms, interiorCost, 
+             furniturePieces, furnitureCost, techDevices, techCost].forEach(input => {
+                input.addEventListener('input', calculateTotals);
+            });
+
+            // Initial calculation
+            calculateTotals();
+        }
+
+        // Contact Form Setup
+        function setupContactForm() {
+            const contactForm = document.getElementById('contactForm');
+            const successModal = document.getElementById('successModal');
+            const closeSuccessModal = document.getElementById('closeSuccessModal');
+            const confirmSuccessModal = document.getElementById('confirmSuccessModal');
+
+            // Handle form submission
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const message = document.getElementById('message').value;
+
+                // You would normally send this data to a server
+                console.log('Form submitted:', { name, email, message });
+                
+                // Show success modal
+                successModal.classList.add('show');
+                
+                // Reset form
+                contactForm.reset();
+            });
+
+            // Close success modal
+            closeSuccessModal.addEventListener('click', function() {
+                successModal.classList.remove('show');
+            });
+
+            confirmSuccessModal.addEventListener('click', function() {
+                successModal.classList.remove('show');
+            });
+        }
+
+        // Portfolio Buttons Setup
+        function setupPortfolioButtons() {
+            const viewAvanishCV = document.getElementById('viewAvanishCV');
+            
+            // CV view functionality (example)
+            if (viewAvanishCV) {
+                viewAvanishCV.addEventListener('click', function() {
+                    // This would normally open a CV file or modal
+                    alert('CV functionality would open Avanish Patel\'s CV');
+                });
+            }
+        }
+        
+        // Gemini AI Chat Setup
+        function setupGeminiChat() {
+            const geminiInput = document.getElementById('geminiInput');
+            const geminiSend = document.getElementById('geminiSend');
+            const geminiMessages = document.getElementById('geminiMessages');
+            
+            if (!geminiInput || !geminiSend || !geminiMessages) return;
+            
+            // Sample responses for the chatbot
+            const responses = {
+                'budget': [
+                    "Based on your budget of ₹17,325,000, I'd recommend allocating 60% to construction, 20% to interior design, 15% to furniture, and 5% to smart technology. This balanced approach ensures quality construction while leaving room for elegant interiors.",
+                    "Looking at your budget, you might consider reducing the per-room interior cost from ₹650,000 to around ₹550,000 by choosing more cost-effective materials that still maintain quality and aesthetic appeal.",
+                    "To optimize your budget, consider phasing your furniture purchases. Start with essential pieces and add decorative items gradually as your budget allows."
+                ],
+                'material': [
+                    "For your budget range, I recommend engineered wood flooring instead of hardwood. It's more cost-effective while still providing excellent durability and aesthetic appeal.",
+                    "Consider using porcelain tiles in wet areas instead of natural stone. They require less maintenance, are more durable, and can perfectly mimic the look of more expensive materials.",
+                    "For interiors, vinyl wallpapers offer a cost-effective alternative to paint or designer wallpapers while providing a wide range of design options."
+                ],
+                'design': [
+                    "Based on current trends, open-concept living spaces with flexible partition options would be ideal for your project. This creates a sense of spaciousness while maintaining functionality.",
+                    "Consider incorporating indoor plants and natural light to create a biophilic design approach, which improves wellness and adds aesthetic value without significant costs.",
+                    "For your project size, I'd recommend focusing on statement lighting fixtures in key areas instead of uniform high-end lighting throughout. This creates visual impact where it matters most."
+                ],
+                'furniture': [
+                    "Instead of imported furniture for all rooms, consider custom-built pieces for main living areas and more budget-friendly options for less frequently used spaces.",
+                    "Multi-functional furniture like storage ottomans, sofa beds, and expandable dining tables can help maximize your space utility while reducing the number of pieces you need to purchase.",
+                    "Local artisan furniture often provides better value than mass-produced items, with higher quality craftsmanship at competitive prices."
+                ],
+                'default': [
+                    "I can help you with budget planning, material selection, furniture recommendations, and design advice. What specific aspect of your project would you like guidance on?",
+                    "To provide more specific recommendations, I'd need to know more about your project priorities. Are you more focused on aesthetics, functionality, sustainability, or budget efficiency?",
+                    "Based on your current budget allocation, your project seems well-balanced. Is there a particular area where you'd like to optimize costs or perhaps invest more?"
+                ]
+            };
+            
+            // Function to add a message to the chat
+            function addMessage(text, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `gemini-message ${isUser ? 'user' : 'gemini'}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'gemini-message-content';
+                contentDiv.innerHTML = text;
+                
+                messageDiv.appendChild(contentDiv);
+                geminiMessages.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                geminiMessages.scrollTop = geminiMessages.scrollHeight;
+            }
+            
+            // Function to get a response based on user input
+            function getResponse(input) {
+                const lowercaseInput = input.toLowerCase();
+                
+                // Check for keywords in the input
+                if (lowercaseInput.includes('budget') || lowercaseInput.includes('cost') || lowercaseInput.includes('price') || lowercaseInput.includes('money')) {
+                    return responses.budget[Math.floor(Math.random() * responses.budget.length)];
+                } else if (lowercaseInput.includes('material') || lowercaseInput.includes('finish') || lowercaseInput.includes('surface')) {
+                    return responses.material[Math.floor(Math.random() * responses.material.length)];
+                } else if (lowercaseInput.includes('design') || lowercaseInput.includes('layout') || lowercaseInput.includes('plan')) {
+                    return responses.design[Math.floor(Math.random() * responses.design.length)];
+                } else if (lowercaseInput.includes('furniture') || lowercaseInput.includes('chair') || lowercaseInput.includes('table') || lowercaseInput.includes('sofa')) {
+                    return responses.furniture[Math.floor(Math.random() * responses.furniture.length)];
+                } else {
+                    return responses.default[Math.floor(Math.random() * responses.default.length)];
+                }
+            }
+            
+            // Send message on button click
+            geminiSend.addEventListener('click', function() {
+                if (geminiInput.value.trim() === '') return;
+                
+                const userMessage = geminiInput.value;
+                addMessage(userMessage, true);
+                geminiInput.value = '';
+                
+                // Simulate typing delay
+                setTimeout(() => {
+                    const response = getResponse(userMessage);
+                    addMessage(response);
+                }, 1000);
+            });
+            
+            // Send message on Enter key
+            geminiInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    geminiSend.click();
+                }
+            });
+        }
+
+        // AR Experience Setup
+        function setupARExperience() {
+            const startARBtn = document.getElementById('startARBtn');
+            const downloadMarkerBtn = document.getElementById('downloadMarkerBtn');
+            const showMarkerBtn = document.getElementById('showMarkerBtn');
+            const closeARBtn = document.getElementById('closeARBtn');
+            const arPlaceholder = document.getElementById('arPlaceholder');
+            const arView = document.getElementById('arView');
+            const arControls = document.getElementById('arControls');
+            const arInfo = document.getElementById('arInfo');
+            const furnitureButtons = document.getElementById('furnitureButtons');
+            const arInfoTitle = document.getElementById('arInfoTitle');
+            const cameraError = document.getElementById('cameraError');
+            
+            // Modal elements
+            const hiroModal = document.getElementById('hiroModal');
+            const closeHiroModal = document.getElementById('closeHiroModal');
+            const closeHiroModalBtn = document.getElementById('closeHiroModalBtn');
+            const downloadMarkerModal = document.getElementById('downloadMarkerModal');
+            
+            // Furniture selection buttons
+            const chairBtn = document.getElementById('chairBtn');
+            const tableBtn = document.getElementById('tableBtn');
+            const redboxBtn = document.getElementById('redboxBtn');
+            
+            // Default furniture
+            let selectedFurniture = '';
+            
+            // Download marker
+            function downloadMarker() {
+                const link = document.createElement('a');
+                link.href = 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png';
+                link.download = 'hiro-marker.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Show Hiro marker modal
+            function showHiroMarker() {
+                hiroModal.classList.add('show');
+            }
+            
+            // Start AR Experience
+            function startARExperience() {
+                // This would normally initialize AR.js with camera permissions
+                // Here we'll just show a placeholder for the demo
+                arPlaceholder.style.display = 'none';
+                arView.style.display = 'block';
+                arControls.style.display = 'flex';
+                arInfo.style.display = 'block';
+                furnitureButtons.style.display = 'flex';
+                
+                // Check if browser supports getUserMedia
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'environment' 
+                        } 
+                    })
+                        .then(function(stream) {
+                            // Create a video element to display the camera feed
+                            const video = document.createElement('video');
+                            video.srcObject = stream;
+                            video.autoplay = true;
+                            video.style.width = '100%';
+                            video.style.height = '100%';
+                            video.style.objectFit = 'cover';
+                            video.style.borderRadius = '12px';
+                            
+                            // Create a wrapper for better positioning
+                            const videoWrapper = document.createElement('div');
+                            videoWrapper.style.position = 'absolute';
+                            videoWrapper.style.top = '0';
+                            videoWrapper.style.left = '0';
+                            videoWrapper.style.width = '100%';
+                            videoWrapper.style.height = '100%';
+                            videoWrapper.style.overflow = 'hidden';
+                            videoWrapper.style.borderRadius = '12px';
+                            
+                            // Clear arView and append video
+                            arView.innerHTML = '';
+                            videoWrapper.appendChild(video);
+                            arView.appendChild(videoWrapper);
+                            
+                            // Overlay text to simulate AR
+                            const overlay = document.createElement('div');
+                            overlay.style.position = 'absolute';
+                            overlay.style.top = '50%';
+                            overlay.style.left = '50%';
+                            overlay.style.transform = 'translate(-50%, -50%)';
+                            overlay.style.color = 'white';
+                            overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                            overlay.style.padding = '10px';
+                            overlay.style.borderRadius = '5px';
+                            overlay.textContent = 'Point camera at HIRO marker';
+                            arView.appendChild(overlay);
+                        })
+                        .catch(function(error) {
+                            console.error('Camera error:', error);
+                            cameraError.textContent = 'Camera access denied or not available. Please check your browser permissions.';
+                            cameraError.style.display = 'block';
+                            
+                            // Revert to placeholder view
+                            stopARExperience();
+                        });
+                } else {
+                    cameraError.textContent = 'Your browser doesn\'t support camera access.';
+                    cameraError.style.display = 'block';
+                    
+                    // Revert to placeholder view
+                    stopARExperience();
+                }
+            }
+            
+            // Stop AR Experience
+            function stopARExperience() {
+                arPlaceholder.style.display = 'flex';
+                arView.style.display = 'none';
+                arControls.style.display = 'none';
+                arInfo.style.display = 'none';
+                furnitureButtons.style.display = 'none';
+                
+                // Stop all video streams
+                const videoElements = arView.querySelectorAll('video');
+                videoElements.forEach(video => {
+                    // Stop the video stream
+                    if (video.srcObject) {
+                        const tracks = video.srcObject.getTracks();
+                        tracks.forEach(track => track.stop());
+                        video.srcObject = null;
+                    }
+                });
+                
+                // Clear arView
+                arView.innerHTML = '';
+                
+                // Reset selected furniture
+                selectedFurniture = '';
+                updateSelectedFurniture();
+            }
+            
+            // Choose furniture
+            function chooseFurniture(type) {
+                selectedFurniture = type;
+                updateSelectedFurniture();
+            }
+            
+            // Update selected furniture UI
+            function updateSelectedFurniture() {
+                // Reset all buttons
+                chairBtn.classList.remove('active');
+                tableBtn.classList.remove('active');
+                redboxBtn.classList.remove('active', 'red-active');
+                
+                // Update info text
+                if (selectedFurniture === 'chair') {
+                    arInfoTitle.textContent = 'Showing Office Chair in AR';
+                    chairBtn.classList.add('active');
+                } else if (selectedFurniture === 'table') {
+                    arInfoTitle.textContent = 'Showing Wooden Table in AR';
+                    tableBtn.classList.add('active');
+                } else if (selectedFurniture === 'redbox') {
+                    arInfoTitle.textContent = 'Showing Red Box in AR';
+                    redboxBtn.classList.add('red-active');
+                } else {
+                    arInfoTitle.textContent = 'Choose an object below to view in AR';
+                }
+            }
+            
+            // Add event listeners
+            if (startARBtn) startARBtn.addEventListener('click', startARExperience);
+            if (downloadMarkerBtn) downloadMarkerBtn.addEventListener('click', downloadMarker);
+            if (showMarkerBtn) showMarkerBtn.addEventListener('click', showHiroMarker);
+            if (closeARBtn) closeARBtn.addEventListener('click', stopARExperience);
+            
+            // Modal event listeners
+            if (closeHiroModal) closeHiroModal.addEventListener('click', function() {
+                hiroModal.classList.remove('show');
+            });
+            
+            if (closeHiroModalBtn) closeHiroModalBtn.addEventListener('click', function() {
+                hiroModal.classList.remove('show');
+            });
+            
+            if (downloadMarkerModal) downloadMarkerModal.addEventListener('click', downloadMarker);
+            
+            // Furniture selection buttons
+            if (chairBtn) chairBtn.addEventListener('click', function() {
+                chooseFurniture('chair');
+            });
+            
+            if (tableBtn) tableBtn.addEventListener('click', function() {
+                chooseFurniture('table');
+            });
+            
+            if (redboxBtn) redboxBtn.addEventListener('click', function() {
+                chooseFurniture('redbox');
+                
+                // Check if AR view is active
+                if (arView.style.display === 'block') {
+                    // Redirect to the separate AR red box page
+                    window.location.href = 'file:///C:/Users/avani/architects-app/index.html';
+                }
+            });
+        }
+
+        // Animations Setup
+        function setupAnimations() {
+            // Intersection Observer for animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('show');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            // Observe all elements with animate-fade-in class
+            document.querySelectorAll('.animate-fade-in').forEach(element => {
+                observer.observe(element);
+            });
+        }
+    </script>
+</body>
+</html>
