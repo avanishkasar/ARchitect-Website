@@ -1,4 +1,4 @@
-ARchitect
+## ARchitect
 Modern AR & 3D Design Tools
 
 A web platform for architectural visualization with:
@@ -11,21 +11,21 @@ AI budget planner
 
 Gemini AI assistant
 
-Team
+## Team
 Avanish Kasar (Lead Architect)
 
 Zaib Khan (AR Specialist)
 
 Jamil Ahmed (Project Manager)
 
-Tech Stack
+## Tech Stack
 HTML, CSS, JavaScript
 
 A-Frame, AR.js
 
 Sketchfab API
 
-How to Run
+## How to Run
 Clone this repo
 
 Open index.html in a browser
