@@ -14,10 +14,12 @@
 ### 🖼️ Screenshots at https://github.com/avanishkasar/WEB_3.0/tree/Presentation-Media
 
 
-### 🎥 Video Tutorials
--Full-Demo.mp4(End-to-end walkthrough (3 mins))
--AR-Setup-Guide.mp4 (Marker setup (1 min))
--Budget-Tool-Tutorial.mp4 (Feature deep dive (2 mins))
+## 🎥 Video Tutorials
+-Full-Video.mp4 -->https://shorturl.at/edFvW](https://github.com/avanishkasar/WEB_3.0/blob/Presentation-Media/Full%20Video.mp4//End-to-end walkthrough (3 mins)
+
+-AR-Setup-Guide.mp4 -->https://github.com/avanishkasar/WEB_3.0/blob/Presentation-Media/AR-Setup-Guide.mp4.mkv//Marker setup (1 min)
+
+-Budget-Tool-Tutorial.mp4 -->https://github.com/avanishkasar/WEB_3.0/blob/Presentation-Media/Budget-Tool-Tutorial.mp4.mp4//Feature deep dive (2 mins)
 
 ---
 
