@@ -37,7 +37,7 @@ Slides: ARchitect-Presentation.pptx --> https://github.com/avanishkasar/WEB_3.0/
 Demo: Watch videos/Full-Video.mp4
 
 
-For Developers:
+## For Developers:
 
 Screenshots confirm UI functionality
 
