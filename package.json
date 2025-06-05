@@ -1,5 +1,5 @@
 {
-  "name": "project",
+  "name": "ar-furniture-viewer",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -8,7 +8,11 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "dependencies": {},
+  "dependencies": {
+    "aframe": "^1.2.0",
+    "aframe-ar": "^0.2.1",
+    "aframe-extras": "^6.1.1"
+  },
   "devDependencies": {
     "vite": "^5.0.0"
   }
