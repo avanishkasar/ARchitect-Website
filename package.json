@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "aframe": "^1.2.0",
-    "aframe-ar": "^0.2.1",
-    "aframe-extras": "^6.1.1"
+    "ar.js": "^2.2.2",
+    "three": "^0.160.0"
   },
   "devDependencies": {
     "vite": "^5.0.0"
