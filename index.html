@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AR Furniture Viewer</title>
     
-    <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
@@ -22,19 +21,53 @@
         transform: translateX(-50%);
         z-index: 1000;
         background: rgba(0, 0, 0, 0.7);
-        padding: 10px;
-        border-radius: 10px;
+        padding: 15px;
+        border-radius: 15px;
         color: white;
         text-align: center;
+        width: 90%;
+        max-width: 400px;
       }
       .button {
         background: #4CAF50;
         border: none;
         color: white;
-        padding: 8px 16px;
+        padding: 12px 20px;
+        margin: 0 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s;
+      }
+      .button:hover {
+        background: #45a049;
+      }
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 24px;
+        z-index: 2000;
+      }
+      .controls {
+        margin-top: 15px;
+      }
+      .control-button {
+        background: #2196F3;
+        border: none;
+        color: white;
+        padding: 8px 15px;
         margin: 0 5px;
         border-radius: 5px;
         cursor: pointer;
+        font-size: 14px;
       }
     </style>
 
@@ -42,8 +75,33 @@
       AFRAME.registerComponent('furniture-model', {
         init: function() {
           this.el.addEventListener('model-loaded', () => {
-            // Scale and position adjustments after model loads
+            // Initial scale and position
             this.el.object3D.scale.set(0.5, 0.5, 0.5);
+            
+            // Hide loading screen when model is ready
+            document.getElementById('loading-screen').style.display = 'none';
+          });
+        }
+      });
+
+      AFRAME.registerComponent('gesture-handler', {
+        init: function() {
+          this.scale = 0.5;
+          this.rotation = 0;
+          
+          // Touch events for rotation
+          let touchStart = { x: 0, y: 0 };
+          
+          this.el.addEventListener('touchstart', (e) => {
+            touchStart.x = e.touches[0].pageX;
+            touchStart.y = e.touches[0].pageY;
+          });
+          
+          this.el.addEventListener('touchmove', (e) => {
+            const deltaX = e.touches[0].pageX - touchStart.x;
+            this.rotation += deltaX * 0.5;
+            this.el.object3D.rotation.y = THREE.Math.degToRad(this.rotation);
+            touchStart.x = e.touches[0].pageX;
           });
         }
       });
@@ -51,47 +109,69 @@
   </head>
   
   <body>
+    <div id="loading-screen">Loading Model...</div>
+    
     <div id="ui-overlay">
-      <button class="button" onclick="switchModel('chair')">Chair</button>
-      <button class="button" onclick="switchModel('table')">Table</button>
-      <button class="button" onclick="switchModel('sofa')">Sofa</button>
+      <div>
+        <button class="button" onclick="switchModel('modern-chair')">Modern Chair</button>
+        <button class="button" onclick="switchModel('dining-table')">Dining Table</button>
+        <button class="button" onclick="switchModel('sofa')">Sofa</button>
+      </div>
+      <div class="controls">
+        <button class="control-button" onclick="scaleModel(1.1)">Scale +</button>
+        <button class="control-button" onclick="scaleModel(0.9)">Scale -</button>
+        <button class="control-button" onclick="resetModel()">Reset</button>
+      </div>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      <!-- Lighting -->
-      <a-entity light="type: ambient; color: #ffffff; intensity: 0.5"></a-entity>
-      <a-entity light="type: directional; color: #ffffff; intensity: 1" position="5 5 5"></a-entity>
-
-      <!-- Assets -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
       <a-assets>
-        <a-asset-item id="chair-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Chair/glTF/Chair.gltf"></a-asset-item>
-        <a-asset-item id="table-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Table/glTF/Table.gltf"></a-asset-item>
-        <a-asset-item id="sofa-model" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/SheenChair/glTF/SheenChair.gltf"></a-asset-item>
+        <a-asset-item id="modern-chair-model" src="https://market-assets.fra1.cdn.digitaloceanspaces.com/market-assets/models/office-chair/model.gltf"></a-asset-item>
+        <a-asset-item id="dining-table-model" src="https://market-assets.fra1.cdn.digitaloceanspaces.com/market-assets/models/table-2/model.gltf"></a-asset-item>
+        <a-asset-item id="sofa-model" src="https://market-assets.fra1.cdn.digitaloceanspaces.com/market-assets/models/sofa-2/model.gltf"></a-asset-item>
       </a-assets>
 
-      <!-- Marker-Based AR -->
-      <a-marker preset="hiro" smooth="true">
+      <a-marker preset="hiro" smooth="true" smoothCount="5" smoothTolerance="0.01" smoothThreshold="5">
         <a-entity
           id="furniture"
-          gltf-model="#chair-model"
+          gltf-model="#modern-chair-model"
           position="0 0 0"
           rotation="0 0 0"
           scale="0.5 0.5 0.5"
-          furniture-model>
+          furniture-model
+          gesture-handler>
         </a-entity>
+        
+        <!-- Enhanced lighting for better model visibility -->
+        <a-entity light="type: ambient; color: #FFF; intensity: 0.6"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 0.8; castShadow: true" position="1 1 1"></a-entity>
       </a-marker>
 
-      <!-- Camera -->
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      let currentModel = 'chair';
+      let currentScale = 0.5;
+      let currentRotation = 0;
       
       function switchModel(modelType) {
+        document.getElementById('loading-screen').style.display = 'flex';
         const furnitureEntity = document.querySelector('#furniture');
         furnitureEntity.setAttribute('gltf-model', `#${modelType}-model`);
-        currentModel = modelType;
+      }
+      
+      function scaleModel(factor) {
+        currentScale *= factor;
+        const furnitureEntity = document.querySelector('#furniture');
+        furnitureEntity.object3D.scale.set(currentScale, currentScale, currentScale);
+      }
+      
+      function resetModel() {
+        currentScale = 0.5;
+        currentRotation = 0;
+        const furnitureEntity = document.querySelector('#furniture');
+        furnitureEntity.object3D.scale.set(currentScale, currentScale, currentScale);
+        furnitureEntity.object3D.rotation.set(0, 0, 0);
       }
     </script>
   </body>
